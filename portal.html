@@ -2240,7 +2240,10 @@ async function killAll(){
 }
 
 function setMsg(m){const el=document.getElementById('sb-msg');if(el)el.textContent=m;}
-load();
+load().then(function(){
+  // WebView 초기 포커스 문제 방지 — 항상 맨 위로
+  setTimeout(function(){ window.scrollTo(0,0); document.body.focus(); document.body.blur(); }, 300);
+});
 
 /* ══════════════════════════════════════
    배경 설정 패널
