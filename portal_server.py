@@ -1147,6 +1147,17 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/upload_bg":
             pass  # POST에서 처리
 
+        elif path in ("/icon_192.png", "/icon_512.png", "/favicon.png"):
+            img_path = os.path.join(os.path.dirname(HTML_PATH), path.lstrip("/"))
+            try:
+                with open(img_path, "rb") as f: data = f.read()
+                self.send_response(200)
+                self.send_header("Content-Type", "image/png")
+                self.end_headers()
+                self.wfile.write(data)
+            except:
+                self.send_response(404); self.end_headers()
+
         elif path == "/manifest.json":
             mf_path = os.path.join(os.path.dirname(HTML_PATH), "manifest.json")
             try:

@@ -3,13 +3,18 @@
   "short_name": "AI 포털",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0a0500",
+  "background_color": "#0d0700",
   "theme_color": "#c89620",
   "icons": [
     {
-      "src": "/saas_portal.ico",
-      "sizes": "any",
-      "type": "image/x-icon"
+      "src": "/icon_192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon_512.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ]
 }
