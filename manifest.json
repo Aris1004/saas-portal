@@ -1,0 +1,15 @@
+{
+  "name": "AI SaaS 포털",
+  "short_name": "AI 포털",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0500",
+  "theme_color": "#c89620",
+  "icons": [
+    {
+      "src": "/saas_portal.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
+}
