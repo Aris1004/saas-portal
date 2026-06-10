@@ -1,0 +1,10 @@
+*.log
+*.bak_*
+__pycache__/
+.env
+node_modules/
+custom_cards.json
+debug_*.log
+electron_*.log
+popen_*.log
+restart_*.log

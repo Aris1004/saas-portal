@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: saas-portal
+    runtime: python
+    buildCommand: echo "no build needed"
+    startCommand: python portal_server.py
+    envVars:
+      - key: PORT
+        generateValue: false
