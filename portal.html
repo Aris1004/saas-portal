@@ -841,7 +841,7 @@ header{text-align:center;margin-bottom:48px}
 }
 .card-time{
   font-size:10px;color:var(--k-deep);margin-bottom:10px;min-height:12px;
-  font-style:italic;
+  font-style:italic;display:none;
 }
 
 /* ── 토글 버튼 (열기/닫기 하나로) ── */
@@ -923,17 +923,22 @@ header{text-align:center;margin-bottom:48px}
 
 /* ── Compact 모드: 카드가 작을 때 (card-compact 클래스) ── */
 .card-compact{overflow:visible !important;}
+.card-compact .card-inner{overflow:hidden;}
 
 /* 기존 ✕/⚙ 버튼 숨기기 */
 .card-compact .card-del,
 .card-compact .card-edit{display:none !important;}
 
-/* 포트·노트·버튼 숨기기 — 제목(card-name)만 남김 */
+/* 포트·노트·버튼·상단ID 숨기기 — 제목(card-name)만 남김 */
+.card-compact .card-top,
 .card-compact .card-ports,
 .card-compact .card-note,
 .card-compact .card-time,
 .card-compact .btn-toggle,
-.card-compact .qr-box{display:none !important;}
+.card-compact .qr-box,
+.card-compact .engine-badge,
+.card-compact .mobile-badge{display:none !important;}
+.card-compact:hover .mobile-badge{display:inline !important;}
 
 /* Compact 모드 패널: 카드 바로 아래에 floating tooltip */
 .card-compact .klimt-reveal-panel{
@@ -1109,7 +1114,13 @@ header{text-align:center;margin-bottom:48px}
     <button onclick="toggleAcmCtrl()" style="position:absolute;top:14px;right:48px;background:none;border:none;color:var(--k-dim);font-size:16px;cursor:pointer;transition:color .2s" title="크기 조절">⚙</button>
     <input type="hidden" id="acm-edit-id">
     <h3 id="acm-modal-title">✦ 카드 추가</h3>
-    <div class="acm-sub">포트 입력 시 자동 탐지 — 타이핑 멈추면 바로 찾아줌</div>
+    <div class="acm-sub" style="display:flex;align-items:center;justify-content:space-between">
+      <span>포트 입력 시 자동 탐지 — 타이핑 멈추면 바로 찾아줌</span>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap;margin-left:12px">
+        <input type="checkbox" id="acm-has-mobile" style="width:14px;height:14px;cursor:pointer;accent-color:#c8a84b">
+        <span style="font-size:11px;color:var(--k-dim)">📱 폰 접속</span>
+      </label>
+    </div>
 
     <!-- ⚙ 컨트롤 패널 -->
     <div id="acm-ctrl-panel" style="display:none;background:rgba(200,150,30,.04);border:1px solid rgba(200,150,30,.12);border-radius:8px;padding:12px 16px;margin-bottom:14px">
@@ -1167,7 +1178,7 @@ header{text-align:center;margin-bottom:48px}
         <div class="acm-row" id="acm-front-cmd-row"><span class="acm-label">프론트 명령</span><input class="acm-input" id="acm-front-cmd" placeholder="npm run dev"></div>
         <div class="acm-row"><span class="acm-label">추가 경로</span><input class="acm-input" id="acm-extra-dir" placeholder="E:\...\ComfyUI"></div>
         <div class="acm-row"><span class="acm-label">추가 실행 명령</span><input class="acm-input" id="acm-extra-cmd" placeholder="conda activate comfyui && python main.py"></div>
-        <div class="acm-row"><span class="acm-label">설명</span><input class="acm-input" id="acm-note" placeholder="간단한 설명"></div>
+<div class="acm-row"><span class="acm-label">설명</span><input class="acm-input" id="acm-note" placeholder="간단한 설명"></div>
       </div>
     </details>
 
@@ -1924,7 +1935,7 @@ function render(){
       const mp=it.mobile_port?`📱 ${it.mobile_port}`:(it.mobile_url?`📱 URL`:'');
       const bp=it.back_port?`B ${it.back_port}`:'';
       const ports=[fp,mp,bp].filter(Boolean).join('  ');
-      const hasMobile=!!(it.mobile_port||it.mobile_url);
+      const hasMobile=!!(it.mobile_port||it.mobile_url||it.has_mobile);
       const mobileQrUrl=it.mobile_url||(it.mobile_port?`http://${localIp}:${it.mobile_port}`:'');
       card.innerHTML=`
         <div class="spin-border"></div>
@@ -1935,7 +1946,7 @@ function render(){
             <span class="dot" id="dot-${it.id}"></span>
           </div>
           <div class="card-name-wrap">
-            <span class="card-name">${it.name}</span>${hasMobile?'<span class="mobile-badge">PC+폰</span>':''}
+            <span class="card-name">${it.name}</span>${hasMobile?'<span class="mobile-badge">폰</span>':''}
             <button class="edit-btn" onclick="editCardName(event,'${it.id}')" title="이름 수정">✏</button>
           </div>
           <div class="card-ports">${ports}</div>
@@ -3172,6 +3183,7 @@ function openAddCard(sectionKey){
    'acm-extra-dir','acm-extra-cmd','acm-note','acm-edit-id'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.value='';
   });
+  const hm=document.getElementById('acm-has-mobile');if(hm)hm.checked=false;
   document.getElementById('acm-result').classList.remove('show');
   _editMode=false;
   document.getElementById('acm-modal-title').textContent='✦ 카드 추가';
@@ -3199,6 +3211,7 @@ function openEditCard(it){
   document.getElementById('acm-front-dir').value=it.front_dir||'';
   document.getElementById('acm-front-cmd').value=it.front_cmd||'';
   document.getElementById('acm-note').value=it.note||'';
+  const hm2=document.getElementById('acm-has-mobile');if(hm2)hm2.checked=!!(it.has_mobile||it.mobile_port||it.mobile_url);
   document.getElementById('acm-result').classList.remove('show');
   document.getElementById('acm-modal-title').textContent='✦ 카드 수정';
   document.querySelector('.acm-ok').textContent='✦ 저장';
@@ -3338,6 +3351,7 @@ async function saveCustomCard(){
     id: editId || 'custom_'+Date.now(),
     name,
     note:document.getElementById('acm-note').value||'',
+    has_mobile:!!(document.getElementById('acm-has-mobile')?.checked),
     front_port:fp, back_port:bp, extra_port:ep,
     back_dir:   document.getElementById('acm-back-dir').value||detectedData.back_dir||null,
     back_cmd:   document.getElementById('acm-back-cmd').value||detectedData.back_cmd||null,
@@ -3393,7 +3407,8 @@ function addCustomCardToDOM(it){
   const fp=it.front_port?`PC ${it.front_port}`:'';
   const bp=it.back_port?`B ${it.back_port}`:'';
   const ports=[fp,bp].filter(Boolean).join('  ');
-  const badge=it.engine_only?'<span style="font-size:9px;color:rgba(100,200,100,.5);margin-left:4px">⚡엔진</span>':'';
+  const badge=it.engine_only && it.section_key!=='tools'?'<span class="engine-badge" style="font-size:9px;color:rgba(100,200,100,.5);margin-left:4px">⚡엔진</span>':'';
+  const mobileBadge=!!(it.mobile_port||it.mobile_url||it.has_mobile)?'<span class="mobile-badge">폰</span>':'';
 
   card.innerHTML=`
     <div class="spin-border"></div>
@@ -3404,7 +3419,7 @@ function addCustomCardToDOM(it){
         <span class="dot" id="dot-${it.id}"></span>
       </div>
       <div class="card-name-wrap">
-        <span class="card-name">${it.name}</span>${badge}
+        <span class="card-name">${it.name}</span>${badge}${mobileBadge}
         <button class="edit-btn" onclick="editCardName(event,'${it.id}')" title="이름 수정">✏</button>
       </div>
       <div class="card-ports">${ports}</div>

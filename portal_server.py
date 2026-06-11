@@ -26,7 +26,7 @@ CUSTOM_CARDS_DB = os.path.join(DATA_DIR if 'DATA_DIR' in dir() else
 
 def load_custom_cards():
     try:
-        with open(CUSTOM_CARDS_DB,"r",encoding="utf-8") as f: return json.load(f)
+        with open(CUSTOM_CARDS_DB,"r",encoding="utf-8-sig") as f: return json.load(f)
     except: return []
 
 def save_custom_cards(cards):
