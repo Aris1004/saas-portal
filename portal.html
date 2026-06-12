@@ -1019,6 +1019,41 @@ header{text-align:center;margin-bottom:48px}
   transition:transform .35s;
 }
 #refresh-btn:hover svg{transform:rotate(180deg)}
+
+/* ── LED 스타일 3종 ── */
+/* 공통 */
+.led-bar,.led-dots,.led-flame{display:none}
+/* Style A — 세그먼트 전진 바 */
+.led-bar{position:absolute;bottom:0;left:0;right:0;height:3px;border-radius:0 0 12px 12px;overflow:hidden;flex-direction:row}
+.led-bar-seg{flex:1;height:100%;background:rgba(70,50,10,.25);transition:background .35s,box-shadow .35s}
+.led-bar-seg.b-on{background:#f5a623;box-shadow:0 0 6px #f5a623}
+.led-bar-seg.f-on{background:#2ce6c0;box-shadow:0 0 6px #2ce6c0}
+.led-bar-seg.e-on{background:#b388ff;box-shadow:0 0 6px #b388ff}
+.led-bar-seg.all-on{background:var(--k-gold);box-shadow:0 0 10px var(--k-gold);animation:led-gold-pulse 1.4s ease-in-out infinite}
+/* Style B — 파워 LED 도트 */
+.led-dots{gap:3px;align-items:center}
+.led-dot{width:7px;height:7px;border-radius:50%;background:rgba(70,50,10,.4);border:1px solid rgba(100,70,10,.2);transition:all .3s;flex-shrink:0}
+.led-dot.b-on{background:#f5a623;border-color:#f5a623;box-shadow:0 0 5px #f5a623}
+.led-dot.f-on{background:#2ce6c0;border-color:#2ce6c0;box-shadow:0 0 5px #2ce6c0}
+.led-dot.e-on{background:#b388ff;border-color:#b388ff;box-shadow:0 0 5px #b388ff}
+.led-dot.all-on{background:var(--k-gold);border-color:var(--k-gold);box-shadow:0 0 8px var(--k-gold);animation:led-gold-pulse 1.4s ease-in-out infinite}
+/* Style C — 점화 시퀀스 */
+.led-flame{position:absolute;inset:0;border-radius:inherit;pointer-events:none;overflow:hidden}
+.led-flame-layer{position:absolute;left:0;right:0;opacity:0;transition:opacity .55s,transform .55s}
+.led-flame-layer.lf-b{bottom:0;height:34%;background:linear-gradient(to top,rgba(245,166,35,.28),transparent);transform:translateY(60%)}
+.led-flame-layer.lf-f{bottom:33%;height:34%;background:linear-gradient(to top,rgba(44,230,192,.22),transparent);transform:translateY(60%)}
+.led-flame-layer.lf-e{bottom:66%;height:34%;background:linear-gradient(to top,rgba(179,136,255,.22),transparent);transform:translateY(60%)}
+.led-flame-layer.on{opacity:1;transform:translateY(0)}
+.led-flame-layer.all-gold{background:linear-gradient(to top,rgba(200,168,75,.32),transparent)}
+@keyframes led-gold-pulse{0%,100%{opacity:1}50%{opacity:.55}}
+/* 스타일 활성화 */
+body.led-A .led-bar{display:flex}
+body.led-B .led-dots{display:flex}
+body.led-C .led-flame{display:block}
+/* LED 스타일 설정 UI */
+.led-style-pick{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.led-style-btn{padding:5px 10px;border-radius:6px;border:1px solid rgba(200,150,30,.25);background:rgba(40,20,0,.5);color:rgba(200,150,30,.6);font-size:11px;cursor:pointer;transition:all .2s}
+.led-style-btn.active,.led-style-btn:hover{background:rgba(200,150,30,.18);border-color:rgba(200,150,30,.55);color:var(--k-gold)}
 </style>
 </head>
 <body>
@@ -1538,6 +1573,15 @@ header{text-align:center;margin-bottom:48px}
           <div class="sm-toggle-left"><div class="sm-toggle-label">카드 자유 이동</div><div class="sm-toggle-desc">드래그로 카드 재배치</div></div>
           <label class="toggle-sw"><input type="checkbox" id="tog-drag" onchange="toggleDrag(this)"><div class="sw-track"></div><div class="sw-thumb"></div></label>
         </div>
+        <div class="sm-toggle-row" style="flex-direction:column;align-items:flex-start;gap:6px">
+          <div class="sm-toggle-left"><div class="sm-toggle-label">LED 상태 표시</div><div class="sm-toggle-desc">카드 활성 상태 시각화</div></div>
+          <div class="led-style-pick">
+            <button class="led-style-btn active" id="led-btn-none" onclick="applyLedStyle('none')">없음</button>
+            <button class="led-style-btn" id="led-btn-A" onclick="applyLedStyle('A')">A · 하단 바</button>
+            <button class="led-style-btn" id="led-btn-B" onclick="applyLedStyle('B')">B · 파워 도트</button>
+            <button class="led-style-btn" id="led-btn-C" onclick="applyLedStyle('C')">C · 불꽃 점화</button>
+          </div>
+        </div>
       </div></div>
     </div>
 
@@ -1940,10 +1984,22 @@ function render(){
       card.innerHTML=`
         <div class="spin-border"></div>
         <div class="shimmer"></div>
+        <div class="led-flame" id="ldf-${it.id}">
+          ${it.back_port?`<div class="led-flame-layer lf-b" id="lfl-b-${it.id}"></div>`:''}
+          ${it.front_port?`<div class="led-flame-layer lf-f" id="lfl-f-${it.id}"></div>`:''}
+          ${it.extra_port?`<div class="led-flame-layer lf-e" id="lfl-e-${it.id}"></div>`:''}
+        </div>
         <div class="card-inner">
           <div class="card-top">
             <span class="card-id">${it.id.replace(/[a-z]/g,'').replace(/^0+/,'#')}</span>
-            <span class="dot" id="dot-${it.id}"></span>
+            <div style="display:flex;align-items:center;gap:5px">
+              <div class="led-dots" id="ldd-${it.id}">
+                ${it.back_port?`<div class="led-dot" id="ldd-b-${it.id}" title="백엔드"></div>`:''}
+                ${it.front_port?`<div class="led-dot" id="ldd-f-${it.id}" title="프론트"></div>`:''}
+                ${it.extra_port?`<div class="led-dot" id="ldd-e-${it.id}" title="엔진"></div>`:''}
+              </div>
+              <span class="dot" id="dot-${it.id}"></span>
+            </div>
           </div>
           <div class="card-name-wrap">
             <span class="card-name">${it.name}</span>${hasMobile?'<span class="mobile-badge">폰</span>':''}
@@ -1954,6 +2010,11 @@ function render(){
           <div class="card-time" id="time-${it.id}"></div>
           <button class="btn-toggle state-open" id="btn-${it.id}"
             onclick="doToggle(event,'${it.id}')">▶ &nbsp;열기</button>
+          <div class="led-bar" id="ldb-${it.id}">
+            ${it.back_port?`<div class="led-bar-seg" id="lbs-b-${it.id}"></div>`:''}
+            ${it.front_port?`<div class="led-bar-seg" id="lbs-f-${it.id}"></div>`:''}
+            ${it.extra_port?`<div class="led-bar-seg" id="lbs-e-${it.id}"></div>`:''}
+          </div>
           ${hasMobile?`<div class="qr-box" id="qr-${it.id}"><div id="qr-cv-${it.id}"></div><div class="qr-url" id="qr-url-${it.id}"></div></div>`:''}
         </div>
       `;
@@ -2126,6 +2187,7 @@ function updateStatus(){
         }
       }
       if(te&&st.last)te.textContent=`⏱ ${st.last}`;
+      updateLed(it.id, st);
 
       // QR 코드 — 모바일 포트 살아있을 때 표시
       const qrBox=document.getElementById(`qr-${it.id}`);
@@ -2186,6 +2248,7 @@ function updateStatus(){
       }
     }
     if(te&&st.last)te.textContent=`⏱ ${st.last}`;
+    updateLed(sid, st);
   });
 
   const el=document.getElementById('sb-live');
@@ -2412,6 +2475,7 @@ function collectAllSettings(){
   const s={};
   SLIDER_IDS.forEach(id=>{const el=document.getElementById(id);if(el)s[id]=el.value;});
   TOGGLE_IDS.forEach(id=>{const el=document.getElementById(id);if(el)s[id]=el.checked;});
+  s['led-style']=window.__ledStyle||'none';
   return s;
 }
 
@@ -2436,6 +2500,62 @@ function applyAllFromSettings(s){
   });
   // 모든 apply 함수 실행
   applyBg();applyCards();applyText();applyButtons();applyCols();applyOverlay();
+  if(s['led-style']!==undefined) applyLedStyle(s['led-style']);
+}
+
+function applyLedStyle(style){
+  window.__ledStyle=style;
+  document.body.classList.remove('led-A','led-B','led-C');
+  if(style==='A'||style==='B'||style==='C') document.body.classList.add('led-'+style);
+  ['none','A','B','C'].forEach(s=>{
+    const b=document.getElementById('led-btn-'+s);
+    if(b) b.classList.toggle('active',s===style);
+  });
+  autoSave();
+}
+
+function updateLed(sid,st){
+  // A: 하단 바
+  const lb=document.getElementById(`ldb-${sid}`);
+  if(lb){
+    const sb=lb.querySelectorAll('.led-bar-seg');
+    const allOn=st.back&&st.front||st.back&&st.extra||st.front&&st.extra||
+                (st.back&&!document.getElementById(`lbs-f-${sid}`)&&!document.getElementById(`lbs-e-${sid}`))||
+                (st.front&&!document.getElementById(`lbs-b-${sid}`)&&!document.getElementById(`lbs-e-${sid}`))||
+                (st.extra&&!document.getElementById(`lbs-b-${sid}`)&&!document.getElementById(`lbs-f-${sid}`));
+    lb.classList.toggle('all-on',!!st.alive&&sb.length<=1);
+    const bs_b=document.getElementById(`lbs-b-${sid}`);
+    const bs_f=document.getElementById(`lbs-f-${sid}`);
+    const bs_e=document.getElementById(`lbs-e-${sid}`);
+    if(bs_b){bs_b.classList.toggle('b-on',!!st.back);bs_b.classList.toggle('all-on',!!st.alive&&sb.length>1);}
+    if(bs_f){bs_f.classList.toggle('f-on',!!st.front);bs_f.classList.toggle('all-on',!!st.alive&&sb.length>1);}
+    if(bs_e){bs_e.classList.toggle('e-on',!!st.extra);bs_e.classList.toggle('all-on',!!st.alive&&sb.length>1);}
+  }
+  // B: 파워 도트
+  const ld=document.getElementById(`ldd-${sid}`);
+  if(ld){
+    const dd_b=document.getElementById(`ldd-b-${sid}`);
+    const dd_f=document.getElementById(`ldd-f-${sid}`);
+    const dd_e=document.getElementById(`ldd-e-${sid}`);
+    const segs=[dd_b,dd_f,dd_e].filter(Boolean);
+    if(dd_b){dd_b.classList.toggle('b-on',!!st.back);dd_b.classList.toggle('all-on',!!st.alive&&segs.length>1);}
+    if(dd_f){dd_f.classList.toggle('f-on',!!st.front);dd_f.classList.toggle('all-on',!!st.alive&&segs.length>1);}
+    if(dd_e){dd_e.classList.toggle('e-on',!!st.extra);dd_e.classList.toggle('all-on',!!st.alive&&segs.length>1);}
+    // 포트 1개짜리: alive면 바로 all-on
+    if(segs.length===1) segs[0].classList.toggle('all-on',!!st.alive);
+  }
+  // C: 불꽃 점화
+  const lf=document.getElementById(`ldf-${sid}`);
+  if(lf){
+    const lf_b=document.getElementById(`lfl-b-${sid}`);
+    const lf_f=document.getElementById(`lfl-f-${sid}`);
+    const lf_e=document.getElementById(`lfl-e-${sid}`);
+    const segs=[lf_b,lf_f,lf_e].filter(Boolean);
+    if(lf_b){lf_b.classList.toggle('on',!!st.back);lf_b.classList.toggle('all-gold',!!st.alive&&segs.length>1);}
+    if(lf_f){lf_f.classList.toggle('on',!!st.front);lf_f.classList.toggle('all-gold',!!st.alive&&segs.length>1);}
+    if(lf_e){lf_e.classList.toggle('on',!!st.extra);lf_e.classList.toggle('all-gold',!!st.alive&&segs.length>1);}
+    if(segs.length===1){segs[0].classList.toggle('on',!!st.alive);segs[0].classList.toggle('all-gold',!!st.alive);}
+  }
 }
 
 function saveBgSettings(){
@@ -3413,10 +3533,22 @@ function addCustomCardToDOM(it){
   card.innerHTML=`
     <div class="spin-border"></div>
     <div class="shimmer"></div>
+    <div class="led-flame" id="ldf-${it.id}">
+      ${it.back_port?`<div class="led-flame-layer lf-b" id="lfl-b-${it.id}"></div>`:''}
+      ${it.front_port?`<div class="led-flame-layer lf-f" id="lfl-f-${it.id}"></div>`:''}
+      ${it.extra_port?`<div class="led-flame-layer lf-e" id="lfl-e-${it.id}"></div>`:''}
+    </div>
     <div class="card-inner">
       <div class="card-top">
         <span class="card-id">custom</span>
-        <span class="dot" id="dot-${it.id}"></span>
+        <div style="display:flex;align-items:center;gap:5px">
+          <div class="led-dots" id="ldd-${it.id}">
+            ${it.back_port?`<div class="led-dot" id="ldd-b-${it.id}" title="백엔드"></div>`:''}
+            ${it.front_port?`<div class="led-dot" id="ldd-f-${it.id}" title="프론트"></div>`:''}
+            ${it.extra_port?`<div class="led-dot" id="ldd-e-${it.id}" title="엔진"></div>`:''}
+          </div>
+          <span class="dot" id="dot-${it.id}"></span>
+        </div>
       </div>
       <div class="card-name-wrap">
         <span class="card-name">${it.name}</span>${badge}${mobileBadge}
@@ -3426,6 +3558,11 @@ function addCustomCardToDOM(it){
       <div class="card-note">${it.note||''}</div>
       <div class="card-time" id="time-${it.id}"></div>
       <button class="btn-toggle state-open" id="btn-${it.id}" onclick="doToggle(event,'${it.id}')">▶ 열기</button>
+      <div class="led-bar" id="ldb-${it.id}">
+        ${it.back_port?`<div class="led-bar-seg" id="lbs-b-${it.id}"></div>`:''}
+        ${it.front_port?`<div class="led-bar-seg" id="lbs-f-${it.id}"></div>`:''}
+        ${it.extra_port?`<div class="led-bar-seg" id="lbs-e-${it.id}"></div>`:''}
+      </div>
     </div>
   `;
 

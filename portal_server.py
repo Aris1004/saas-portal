@@ -935,11 +935,16 @@ def get_status():
 
     def check(item):
         sid = item["id"]
-        ports = [p for p in [item.get("front_port"), item.get("back_port"), item.get("extra_port")] if p]
-        alive = any(is_port_open(p) for p in ports)
+        fp = item.get("front_port")
+        bp = item.get("back_port")
+        ep = item.get("extra_port")
+        f_alive = is_port_open(fp) if fp else None
+        b_alive = is_port_open(bp) if bp else None
+        e_alive = is_port_open(ep) if ep else None
+        alive = any(v for v in [f_alive, b_alive, e_alive] if v is not None)
         lt = LAUNCH_TIME.get(sid)
         lt_str = datetime.datetime.fromtimestamp(lt).strftime("%p %I시%M분") if lt else ""
-        return sid, {"alive": alive, "last": lt_str}
+        return sid, {"alive": alive, "front": f_alive, "back": b_alive, "extra": e_alive, "last": lt_str}
 
     result = {}
     with ThreadPoolExecutor(max_workers=16) as ex:
