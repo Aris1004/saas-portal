@@ -2515,21 +2515,18 @@ function applyLedStyle(style){
 }
 
 function updateLed(sid,st){
+  // 정의된 포트가 전부 켜진 경우만 골드
+  const allPortsOn=(st.back!==null?!!st.back:true)&&(st.front!==null?!!st.front:true)&&(st.extra!==null?!!st.extra:true);
   // A: 하단 바
   const lb=document.getElementById(`ldb-${sid}`);
   if(lb){
-    const sb=lb.querySelectorAll('.led-bar-seg');
-    const allOn=st.back&&st.front||st.back&&st.extra||st.front&&st.extra||
-                (st.back&&!document.getElementById(`lbs-f-${sid}`)&&!document.getElementById(`lbs-e-${sid}`))||
-                (st.front&&!document.getElementById(`lbs-b-${sid}`)&&!document.getElementById(`lbs-e-${sid}`))||
-                (st.extra&&!document.getElementById(`lbs-b-${sid}`)&&!document.getElementById(`lbs-f-${sid}`));
-    lb.classList.toggle('all-on',!!st.alive&&sb.length<=1);
     const bs_b=document.getElementById(`lbs-b-${sid}`);
     const bs_f=document.getElementById(`lbs-f-${sid}`);
     const bs_e=document.getElementById(`lbs-e-${sid}`);
-    if(bs_b){bs_b.classList.toggle('b-on',!!st.back);bs_b.classList.toggle('all-on',!!st.alive&&sb.length>1);}
-    if(bs_f){bs_f.classList.toggle('f-on',!!st.front);bs_f.classList.toggle('all-on',!!st.alive&&sb.length>1);}
-    if(bs_e){bs_e.classList.toggle('e-on',!!st.extra);bs_e.classList.toggle('all-on',!!st.alive&&sb.length>1);}
+    if(bs_b){bs_b.classList.toggle('b-on',!!st.back&&!allPortsOn);bs_b.classList.toggle('all-on',allPortsOn);}
+    if(bs_f){bs_f.classList.toggle('f-on',!!st.front&&!allPortsOn);bs_f.classList.toggle('all-on',allPortsOn);}
+    if(bs_e){bs_e.classList.toggle('e-on',!!st.extra&&!allPortsOn);bs_e.classList.toggle('all-on',allPortsOn);}
+    if(!bs_b&&!bs_f&&!bs_e) lb.classList.toggle('all-on',allPortsOn);
   }
   // B: 파워 도트
   const ld=document.getElementById(`ldd-${sid}`);
@@ -2537,12 +2534,9 @@ function updateLed(sid,st){
     const dd_b=document.getElementById(`ldd-b-${sid}`);
     const dd_f=document.getElementById(`ldd-f-${sid}`);
     const dd_e=document.getElementById(`ldd-e-${sid}`);
-    const segs=[dd_b,dd_f,dd_e].filter(Boolean);
-    if(dd_b){dd_b.classList.toggle('b-on',!!st.back);dd_b.classList.toggle('all-on',!!st.alive&&segs.length>1);}
-    if(dd_f){dd_f.classList.toggle('f-on',!!st.front);dd_f.classList.toggle('all-on',!!st.alive&&segs.length>1);}
-    if(dd_e){dd_e.classList.toggle('e-on',!!st.extra);dd_e.classList.toggle('all-on',!!st.alive&&segs.length>1);}
-    // 포트 1개짜리: alive면 바로 all-on
-    if(segs.length===1) segs[0].classList.toggle('all-on',!!st.alive);
+    if(dd_b){dd_b.classList.toggle('b-on',!!st.back&&!allPortsOn);dd_b.classList.toggle('all-on',allPortsOn);}
+    if(dd_f){dd_f.classList.toggle('f-on',!!st.front&&!allPortsOn);dd_f.classList.toggle('all-on',allPortsOn);}
+    if(dd_e){dd_e.classList.toggle('e-on',!!st.extra&&!allPortsOn);dd_e.classList.toggle('all-on',allPortsOn);}
   }
   // C: 불꽃 점화
   const lf=document.getElementById(`ldf-${sid}`);
@@ -2550,11 +2544,9 @@ function updateLed(sid,st){
     const lf_b=document.getElementById(`lfl-b-${sid}`);
     const lf_f=document.getElementById(`lfl-f-${sid}`);
     const lf_e=document.getElementById(`lfl-e-${sid}`);
-    const segs=[lf_b,lf_f,lf_e].filter(Boolean);
-    if(lf_b){lf_b.classList.toggle('on',!!st.back);lf_b.classList.toggle('all-gold',!!st.alive&&segs.length>1);}
-    if(lf_f){lf_f.classList.toggle('on',!!st.front);lf_f.classList.toggle('all-gold',!!st.alive&&segs.length>1);}
-    if(lf_e){lf_e.classList.toggle('on',!!st.extra);lf_e.classList.toggle('all-gold',!!st.alive&&segs.length>1);}
-    if(segs.length===1){segs[0].classList.toggle('on',!!st.alive);segs[0].classList.toggle('all-gold',!!st.alive);}
+    if(lf_b){lf_b.classList.toggle('on',!!st.back||allPortsOn);lf_b.classList.toggle('all-gold',allPortsOn);}
+    if(lf_f){lf_f.classList.toggle('on',!!st.front||allPortsOn);lf_f.classList.toggle('all-gold',allPortsOn);}
+    if(lf_e){lf_e.classList.toggle('on',!!st.extra||allPortsOn);lf_e.classList.toggle('all-gold',allPortsOn);}
   }
 }
 
