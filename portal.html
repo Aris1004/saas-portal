@@ -1040,11 +1040,11 @@ header{text-align:center;margin-bottom:48px}
 /* Style C — 점화 시퀀스 */
 .led-flame{position:absolute;inset:0;border-radius:inherit;pointer-events:none;overflow:hidden}
 .led-flame-layer{position:absolute;left:0;right:0;opacity:0;transition:opacity .55s,transform .55s}
-.led-flame-layer.lf-b{bottom:0;height:34%;background:linear-gradient(to top,rgba(245,166,35,.28),transparent);transform:translateY(60%)}
-.led-flame-layer.lf-f{bottom:33%;height:34%;background:linear-gradient(to top,rgba(44,230,192,.22),transparent);transform:translateY(60%)}
-.led-flame-layer.lf-e{bottom:66%;height:34%;background:linear-gradient(to top,rgba(179,136,255,.22),transparent);transform:translateY(60%)}
+.led-flame-layer.lf-b{bottom:0;height:38%;background:linear-gradient(to top,rgba(245,166,35,.55),transparent);transform:translateY(40%)}
+.led-flame-layer.lf-f{bottom:0;height:58%;background:linear-gradient(to top,rgba(44,230,192,.22),transparent);transform:translateY(40%)}
+.led-flame-layer.lf-e{bottom:0;height:72%;background:linear-gradient(to top,rgba(179,136,255,.18),transparent);transform:translateY(40%)}
 .led-flame-layer.on{opacity:1;transform:translateY(0)}
-.led-flame-layer.all-gold{background:linear-gradient(to top,rgba(200,168,75,.32),transparent)}
+.led-flame-layer.all-gold{background:linear-gradient(to top,rgba(240,190,50,.58),transparent)}
 @keyframes led-gold-pulse{0%,100%{opacity:1}50%{opacity:.55}}
 /* 스타일 활성화 */
 body.led-A .led-bar{display:flex}
@@ -1579,7 +1579,7 @@ body.led-C .led-flame{display:block}
             <button class="led-style-btn active" id="led-btn-none" onclick="applyLedStyle('none')">없음</button>
             <button class="led-style-btn" id="led-btn-A" onclick="applyLedStyle('A')">A · 하단 바</button>
             <button class="led-style-btn" id="led-btn-B" onclick="applyLedStyle('B')">B · 파워 도트</button>
-            <button class="led-style-btn" id="led-btn-C" onclick="applyLedStyle('C')">C · 불꽃 점화</button>
+            <button class="led-style-btn" id="led-btn-C" onclick="applyLedStyle('C')">C · 아우라</button>
           </div>
         </div>
       </div></div>
